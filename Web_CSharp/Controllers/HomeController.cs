@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Web_CSharp.Models;
 
@@ -14,6 +14,11 @@ namespace Web_CSharp.Controllers
         }
 
         public IActionResult Index()
+        {
+            return View();
+        }
+        [Route("/404")] // Thiết lập 1 domain là 404 nhưng lại chạy file PageNotFound
+        public IActionResult PageNotFound()
         {
             return View();
         }
