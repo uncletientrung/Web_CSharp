@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Web_CSharp.Data;
 using Web_CSharp.Helpers;
@@ -23,6 +24,15 @@ builder.Services.AddSession(options =>
 // Dang Ky Map
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
+// Dang Nhap Authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(option =>
+{
+    option.LoginPath = "/KhachHang/DangNhap";
+    option.AccessDeniedPath = "/AccessDenied";
+});
+
+
+
 
 var app = builder.Build();
 
@@ -39,8 +49,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 // Thêm (Vì yêu c?u ?úng th? t? nên ph?i v?y)
-app.UseSession();
+app.UseSession(); //Su dung session
+app.UseAuthentication(); // Xac Thuc Nguoi Dun, Dung` trong DangNhapController
 // h?t
+
 app.UseAuthorization();
 
 app.MapControllerRoute(

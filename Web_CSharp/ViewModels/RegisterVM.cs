@@ -38,6 +38,8 @@ namespace Web_CSharp.ViewModels
         [EmailAddress(ErrorMessage="Chưa đúng định dạng")]
         public string Email { get; set; }
 
-        public string? Hinh { get; set; }
+
+        [Required(ErrorMessage = "Thiếu hình")]
+        public string Hinh { get; set; }
     }
 }
