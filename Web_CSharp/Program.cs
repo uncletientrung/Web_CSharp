@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Web_CSharp.Data;
+using Web_CSharp.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,15 +11,17 @@ builder.Services.AddDbContext<Hshop2023Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("HShop"));
 });
 
-// Làm vi?c v?i Session
+// Làm viec voi Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromSeconds(120); // Thi?t l?p t? ??ng h?y session trong bao lâu VD 10 là 10s
+    options.IdleTimeout = TimeSpan.FromSeconds(120); // Thiet lap session trong bao lâu VD 10 là 10s
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
+// Dang Ky Map
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 
 var app = builder.Build();
