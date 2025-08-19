@@ -8,12 +8,11 @@ namespace Web_CSharp.Controllers
     public class CartController : Controller
     {
         private readonly Hshop2023Context db;
-        const string CART_KEY = "MYCART";
         public CartController(Hshop2023Context context)
         {
             db = context; // Nhớ cho read-only-field để hết lỗi
         }
-        public List<CartItem> Cart => HttpContext.Session.Get<List<CartItem>>(CART_KEY) ?? new List<CartItem>();
+        public List<CartItem> Cart => HttpContext.Session.Get<List<CartItem>>(MySetting.CART_KEY) ?? new List<CartItem>();
                 // Get nay là Get bên helper có truyền kiểu dữ liệu vào Get<T>
         public IActionResult Index()
         {
@@ -43,7 +42,7 @@ namespace Web_CSharp.Controllers
             {
                 item.SoLuong += quantity;
             }
-            HttpContext.Session.Set(CART_KEY, giohang);
+            HttpContext.Session.Set(MySetting.CART_KEY, giohang);
             return RedirectToAction("Index");
         }
 
@@ -54,7 +53,7 @@ namespace Web_CSharp.Controllers
             if(item != null)
             {
                 gioHang.Remove(item);
-                HttpContext.Session.Set(CART_KEY, gioHang); 
+                HttpContext.Session.Set(MySetting.CART_KEY, gioHang); 
             }
             return RedirectToAction("Index");
         }
