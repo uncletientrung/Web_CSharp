@@ -2,6 +2,7 @@
 using Web_CSharp.Data;
 using Web_CSharp.ViewModels;
 using Web_CSharp.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Web_CSharp.Controllers
 {
@@ -56,6 +57,75 @@ namespace Web_CSharp.Controllers
                 HttpContext.Session.Set(MySetting.CART_KEY, gioHang); 
             }
             return RedirectToAction("Index");
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult Checkout()
+        {
+            if (Cart.Count == 0) {
+                return Redirect("/");
+            }
+            return View(Cart);
+        }
+        [Authorize]
+        [HttpPost]
+        public IActionResult Checkout(CheckoutVM model)
+        {
+            if (ModelState.IsValid)
+            {
+                var customerID=HttpContext.User.Claims.SingleOrDefault(
+                    p => p.Type == MySetting.CLAIM_CUSTOMERID).Value;
+                // Lúc đăng nhập thì có tạo List Claim lưu trên máy gồm Email, Nam, CustomerID giờ lấy xài
+                var khachHang = new KhachHang();
+                if (model.GiongKhachHang)
+                {
+                    khachHang = db.KhachHangs.SingleOrDefault(kh => kh.MaKh == customerID);
+                        // Giống select id
+                }
+                var hoadon = new HoaDon
+                {
+                    MaKh = customerID,
+                    HoTen = model.HoTen ?? khachHang.HoTen,
+                    DiaChi =model.DiaChi ?? khachHang.DiaChi,
+                    DienThoai= model.DienThoai ?? khachHang.DienThoai,
+                    NgayDat= DateTime.Now,
+                    CachThanhToan= "COD",
+                    CachVanChuyen ="GRAB",
+                    MaTrangThai=0,
+                    GhiChu= model.GhiChu
+                };
+                db.Database.BeginTransaction(); // Chuẩn bị các dữ liệu để push database
+                try
+                {
+                    
+                    db.Add(hoadon);
+                    db.SaveChanges();
+                    var cthds = new List<ChiTietHd>();
+                    foreach( var item in Cart)
+                    {
+                        cthds.Add(new ChiTietHd
+                        {
+                            MaHd= hoadon.MaHd,
+                            SoLuong=item.SoLuong,
+                            DonGia=item.DonGia,
+                            MaHh= item.MaHh,
+                            GiamGia=0,
+                        });
+                    }
+                    db.AddRange(cthds);
+                    db.SaveChanges();
+
+                    db.Database.CommitTransaction(); // Xác nhận push hết lên
+                    HttpContext.Session.Set<List<CartItem>>(MySetting.CART_KEY, new List<CartItem>());
+                    return View("Success");
+                }
+                catch (Exception ex) {
+                    db.Database.RollbackTransaction(); // Nếu gặp lỗi làm mới transaction
+                }
+                
+            }
+            return View(Cart);
         }
     }
 }

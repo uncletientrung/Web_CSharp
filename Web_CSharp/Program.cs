@@ -16,7 +16,7 @@ builder.Services.AddDbContext<Hshop2023Context>(options =>
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromSeconds(120); // Thiet lap session trong bao lâu VD 10 là 10s
+    options.IdleTimeout = TimeSpan.FromMinutes(2); // Thiet lap session trong bao lâu VD 2 là 2 phút
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
