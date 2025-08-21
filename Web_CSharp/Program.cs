@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+ï»¿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Web_CSharp.Data;
 using Web_CSharp.Helpers;
@@ -12,11 +12,11 @@ builder.Services.AddDbContext<Hshop2023Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("HShop"));
 });
 
-// Làm viec voi Session
+// LÃ m viec voi Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(2); // Thiet lap session trong bao lâu VD 2 là 2 phút
+    options.IdleTimeout = TimeSpan.FromMinutes(2); // Thiet lap session trong bao lÃ¢u VD 2 lÃ  2 phÃºt
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -31,8 +31,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     option.AccessDeniedPath = "/AccessDenied";
 });
 
-
-
+// Dang ky PaypalClient dáº¡ng Singleton() - chá»‰ cÃ³ 1 istance duy nháº¥t trong toÃ n á»©ng dá»¥ng
+builder.Services.AddSingleton(x => new PaypalClient(
+    builder.Configuration["PaypalOptions:AppId"],
+    builder.Configuration["PaypalOptions:AppSecret"],
+    builder.Configuration["PaypalOptions:Mode"]
+));
 
 var app = builder.Build();
 
@@ -48,7 +52,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-// Thêm (Vì yêu c?u ?úng th? t? nên ph?i v?y)
+// ThÃªm (VÃ¬ yÃªu c?u ?Ãºng th? t? nÃªn ph?i v?y)
 app.UseSession(); //Su dung session
 app.UseAuthentication(); // Xac Thuc Nguoi Dun, Dung` trong DangNhapController
 // h?t

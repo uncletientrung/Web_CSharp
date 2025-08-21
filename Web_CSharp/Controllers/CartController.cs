@@ -8,9 +8,11 @@ namespace Web_CSharp.Controllers
 {
     public class CartController : Controller
     {
+        private readonly PaypalClient _paypalClinet;
         private readonly Hshop2023Context db;
-        public CartController(Hshop2023Context context)
+        public CartController(Hshop2023Context context, PaypalClient paypalClient)
         {
+            _paypalClinet=paypalClient;
             db = context; // Nhớ cho read-only-field để hết lỗi
         }
         public List<CartItem> Cart => HttpContext.Session.Get<List<CartItem>>(MySetting.CART_KEY) ?? new List<CartItem>();
@@ -66,8 +68,9 @@ namespace Web_CSharp.Controllers
             if (Cart.Count == 0) {
                 return Redirect("/");
             }
+            ViewBag.PaypalClientId = _paypalClinet.ClientId;
             return View(Cart);
-        }
+        }   
         [Authorize]
         [HttpPost]
         public IActionResult Checkout(CheckoutVM model)
@@ -127,5 +130,53 @@ namespace Web_CSharp.Controllers
             }
             return View(Cart);
         }
+
+        [Authorize]
+        public IActionResult PaymentSuccess()
+        {
+            return View("Success");
+        }
+
+
+        #region Thanh toan Paypal
+        [Authorize]
+        [HttpPost("/Cart/create-paypal-order")]
+        public async Task<IActionResult> CreatePaypalOrder(CancellationToken cancellationToken)
+        {
+            // Thông tin của đơn hàng gửi qua Paypal
+            var tongTien = Cart.Sum(p => p.ThanhTien).ToString();
+            var donViTienTe = "USD";
+            var maDonHangThamChieu = "DH" + DateTime.Now.Ticks.ToString();
+            try
+            {
+                var response = await _paypalClinet.CreateOrder(tongTien, donViTienTe, maDonHangThamChieu);
+                return Ok(response);
+            }catch (Exception ex)
+            {
+                var error = new { ex.GetBaseException().Message };
+                return BadRequest(error);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("/Cart/capture-paypal-order")]
+        public async Task<IActionResult> CapturePaypalOrder(CancellationToken cancellationToken, string orderID)
+        {
+            try
+            {
+                var response= await _paypalClinet.CaptureOrder(orderID);
+                // Lưu database đơn hàng của mình 
+                return Ok(response);
+            }
+            catch (Exception ex) {
+                var error = new { ex.GetBaseException().Message };
+                return BadRequest(error);
+            }
+
+
+
+        #endregion
+
+
     }
 }
