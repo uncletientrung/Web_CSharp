@@ -138,7 +138,7 @@ namespace Web_CSharp.Controllers
         }
 
 
-        #region Thanh toan Paypal
+        //#region Thanh toan Paypal
         [Authorize]
         [HttpPost("/Cart/create-paypal-order")]
         public async Task<IActionResult> CreatePaypalOrder(CancellationToken cancellationToken)
@@ -164,18 +164,18 @@ namespace Web_CSharp.Controllers
         {
             try
             {
-                var response= await _paypalClinet.CaptureOrder(orderID);
+                var response = await _paypalClinet.CaptureOrder(orderID);
                 // Lưu database đơn hàng của mình 
                 return Ok(response);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 var error = new { ex.GetBaseException().Message };
                 return BadRequest(error);
             }
+        }
 
 
-
-        #endregion
 
 
     }
